@@ -64,20 +64,3 @@ Install the generated `.vsix` in VS Code:
 ```bash
 code --install-extension ik8b-language-support-0.1.0.vsix
 ```
-
-## Publish to Visual Studio Marketplace
-
-1. Create a publisher in Marketplace.
-2. Update `publisher` in `package.json`.
-3. Login and publish:
-
-```bash
-vsce login <your-publisher>
-vsce publish
-```
-
-## Notes
-
-- This extension focuses on language ergonomics and readability.
-- For optional compiler diagnostics, keep the `ik8b` binary available in the workspace root (`./ik8b`) or set `ik8b.compilerPath`.
-- If you want richer IDE features (go-to-definition, document symbols, hover docs), the next step is adding a full Language Server (LSP).
