@@ -41,7 +41,7 @@ Visual Studio Code support for the **ik8b** language (`.ik`) used for AVR-8 embe
 ## Installation (Local Development)
 
 1. Open this folder in VS Code:
-   - `ik8b/vscode-ik8b`
+   - `vscode-ik8b`
 2. Press `F5` to launch an Extension Development Host.
 3. Open or create any `.ik` file and start coding.
 
@@ -56,7 +56,6 @@ npm install -g @vscode/vsce
 Package:
 
 ```bash
-cd vscode-ik8b
 vsce package
 ```
 
@@ -73,7 +72,6 @@ code --install-extension ik8b-language-support-0.1.0.vsix
 3. Login and publish:
 
 ```bash
-cd vscode-ik8b
 vsce login <your-publisher>
 vsce publish
 ```
@@ -83,12 +81,3 @@ vsce publish
 - This extension focuses on language ergonomics and readability.
 - For optional compiler diagnostics, keep the `ik8b` binary available in the workspace root (`./ik8b`) or set `ik8b.compilerPath`.
 - If you want richer IDE features (go-to-definition, document symbols, hover docs), the next step is adding a full Language Server (LSP).
-
-## Color Clarity (Optional Theme)
-
-This extension ships with an optional built-in theme: **ik8b Clean**.
-
-To enable it:
-1. Open Command Palette (`Ctrl+Shift+P`).
-2. Run `Preferences: Color Theme`.
-3. Select `ik8b Clean`.

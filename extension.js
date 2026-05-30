@@ -320,7 +320,9 @@ class Parser {
 
   parseReturn() {
     this.expect('kw', 'return');
-    if (!this.at('sym', '}') && !this.at('eof')) {
+    // `return` without value is valid; only parse expression when the next token
+    // can actually start one.
+    if (this.canStartExpr()) {
       this.parseExpr();
     }
   }
@@ -336,6 +338,19 @@ class Parser {
   }
 
   parseExpr() { this.parseLogicalOr(); }
+  canStartExpr() {
+    return (
+      this.at('num') ||
+      this.at('char') ||
+      this.at('kw', 'true') ||
+      this.at('kw', 'false') ||
+      this.at('id') ||
+      this.at('sym', '(') ||
+      this.at('sym', '!') ||
+      this.at('sym', '~') ||
+      this.at('sym', '-')
+    );
+  }
   parseLogicalOr() {
     this.parseLogicalAnd();
     while (this.at('sym', '||')) { this.take(); this.parseLogicalAnd(); }
@@ -461,9 +476,8 @@ function runCompilerValidation(doc, diagnostics) {
 
   const compilerPath = resolveCompilerPath(doc);
   const sourceText = doc.getText();
-  const sourceDir = path.dirname(doc.uri.fsPath);
-  const base = path.basename(doc.uri.fsPath, '.ik');
-  const tmpIn = path.join(sourceDir, `.__ik8b_lint__${base}_${Date.now()}.ik`);
+  const base = path.basename(doc.uri.fsPath || 'untitled', '.ik') || 'untitled';
+  const tmpIn = path.join(os.tmpdir(), `ik8b_lint_${process.pid}_${base}_${Date.now()}.ik`);
   const tmpOut = path.join(os.tmpdir(), `ik8b_lint_${process.pid}_${Date.now()}.hex`);
 
   try {

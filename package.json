@@ -4,10 +4,10 @@
   "description": "Complete VS Code language support for ik8b (.ik): syntax highlighting, snippets, comments, bracket matching, and editor behavior.",
   "version": "0.1.0",
   "publisher": "ik8b",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ik8b/ik8b"
+    "url": "git+https://github.com/isakruas/vscode-ik8b.git"
   },
   "keywords": [
     "ik8b",
@@ -21,8 +21,7 @@
   },
   "categories": [
     "Programming Languages",
-    "Snippets",
-    "Themes"
+    "Snippets"
   ],
   "main": "./extension.js",
   "activationEvents": [
@@ -48,13 +47,6 @@
         "language": "ik8b",
         "scopeName": "source.ik8b",
         "path": "./syntaxes/ik8b.tmLanguage.json"
-      }
-    ],
-    "themes": [
-      {
-        "label": "ik8b Clean",
-        "uiTheme": "vs-dark",
-        "path": "./themes/ik8b-clean-color-theme.json"
       }
     ],
     "snippets": [
@@ -84,6 +76,15 @@
       }
     },
     "configurationDefaults": {
+      "editor.minimap.renderCharacters": false,
+      "editor.minimap.scale": 1,
+      "editor.minimap.size": "proportional",
+      "editor.minimap.maxColumn": 120,
+      "editor.minimap.showSlider": "mouseover",
+      "editor.minimap.showRegionSectionHeaders": false,
+      "editor.minimap.showMarkSectionHeaders": false,
+      "editor.minimap.sectionHeaderFontSize": 9,
+      "editor.minimap.sectionHeaderLetterSpacing": 0,
       "[ik8b]": {
         "editor.tabSize": 4,
         "editor.insertSpaces": true,
@@ -91,7 +92,17 @@
         "editor.autoClosingBrackets": "always",
         "editor.autoClosingQuotes": "always",
         "editor.formatOnType": false,
-        "editor.defaultFormatter": null
+        "editor.defaultFormatter": null,
+        "editor.minimap.enabled": true,
+        "editor.minimap.renderCharacters": false,
+        "editor.minimap.scale": 1,
+        "editor.minimap.size": "proportional",
+        "editor.minimap.maxColumn": 120,
+        "editor.minimap.showSlider": "mouseover",
+        "editor.minimap.showRegionSectionHeaders": false,
+        "editor.minimap.showMarkSectionHeaders": false,
+        "editor.minimap.sectionHeaderFontSize": 9,
+        "editor.minimap.sectionHeaderLetterSpacing": 0
       }
     }
   }
