@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+**/node_modules/**
+
+# Package artifacts
+*.vsix
+**/*.vsix
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build/output (caso você adicione transpile/bundle depois)
+dist/
+out/
+build/
+coverage/
+.vscode-test/
+
+# OS/editor
+.DS_Store
+**/.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# VS Code workspace settings
+.vscode/**

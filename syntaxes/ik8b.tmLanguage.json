@@ -1,0 +1,210 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "ik8b",
+  "scopeName": "source.ik8b",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#compileTime" },
+    { "include": "#keywords" },
+    { "include": "#types" },
+    { "include": "#booleans" },
+    { "include": "#operators" },
+    { "include": "#intrinsics" },
+    { "include": "#functionCalls" },
+    { "include": "#functionDecl" },
+    { "include": "#registers" },
+    { "include": "#variables" },
+    { "include": "#namespaceId" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.ik8b",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.single.ik8b",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.ik8b",
+              "match": "\\\\(?:n|r|t|0|\\\\|')"
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.ik8b",
+          "match": "\\b0x[0-9A-Fa-f]+\\b"
+        },
+        {
+          "name": "constant.numeric.decimal.ik8b",
+          "match": "(?<![A-Za-z0-9_./])-?\\b\\d+\\b"
+        }
+      ]
+    },
+    "compileTime": {
+      "patterns": [
+        {
+          "name": "keyword.control.conditional.ik8b",
+          "match": "\\?"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.ik8b",
+          "match": "\\b(?:import|namespace|const|mut|val|return|loop|switch)\\b"
+        },
+        {
+          "name": "keyword.control.flow.ik8b",
+          "match": ":"
+        },
+        {
+          "name": "keyword.operator.wildcard.ik8b",
+          "match": "(?<![A-Za-z0-9_])\\*(?![A-Za-z0-9_])"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.ik8b",
+          "match": "\\b(?:u8|u16|void)\\b"
+        }
+      ]
+    },
+    "booleans": {
+      "patterns": [
+        {
+          "name": "constant.language.boolean.ik8b",
+          "match": "\\b(?:true|false)\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.assignment.ik8b",
+          "match": "->\\+|->-|->&|->\\||->\\^|->"
+        },
+        {
+          "name": "keyword.operator.comparison.ik8b",
+          "match": "==|!=|<=|>=|<|>"
+        },
+        {
+          "name": "keyword.operator.logical.ik8b",
+          "match": "&&|\\|\\||!"
+        },
+        {
+          "name": "keyword.operator.bitwise.ik8b",
+          "match": "~|&|\\^|\\|"
+        },
+        {
+          "name": "keyword.operator.arithmetic.ik8b",
+          "match": "\\+|-|\\*|/|%|\\.\\."
+        },
+        {
+          "name": "punctuation.separator.comma.ik8b",
+          "match": ","
+        },
+        {
+          "name": "punctuation.section.braces.begin.ik8b",
+          "match": "\\{"
+        },
+        {
+          "name": "punctuation.section.braces.end.ik8b",
+          "match": "\\}"
+        },
+        {
+          "name": "punctuation.section.parens.begin.ik8b",
+          "match": "\\("
+        },
+        {
+          "name": "punctuation.section.parens.end.ik8b",
+          "match": "\\)"
+        },
+        {
+          "name": "punctuation.section.brackets.begin.ik8b",
+          "match": "\\["
+        },
+        {
+          "name": "punctuation.section.brackets.end.ik8b",
+          "match": "\\]"
+        }
+      ]
+    },
+    "intrinsics": {
+      "patterns": [
+        {
+          "name": "support.function.builtin.ik8b",
+          "match": "@(?:nop|sleep|wdr|break|reti|lpm|elpm|spm|ijmp|icall|eijmp|eicall|des|swap|movw|mul|muls|mulsu|fmul|fmuls|fmulsu)(?=\\s*\\()"
+        }
+      ]
+    },
+    "functionCalls": {
+      "patterns": [
+        {
+          "name": "entity.name.function.ik8b",
+          "match": "@[A-Za-z_][A-Za-z0-9_./]*(?=\\s*\\()"
+        }
+      ]
+    },
+    "functionDecl": {
+      "patterns": [
+        {
+          "name": "entity.name.function.ik8b",
+          "match": "(?m)^\\s*(@[A-Za-z_][A-Za-z0-9_./]*)\\s*(?=\\()"
+        },
+        {
+          "name": "entity.name.function.ik8b",
+          "match": "(?m)^\\s*(@[A-Za-z_][A-Za-z0-9_./]*)\\s*(?=\\{)"
+        }
+      ]
+    },
+    "registers": {
+      "patterns": [
+        {
+          "name": "constant.other.hardware-register.ik8b",
+          "match": "%[A-Z_][A-Z0-9_./]*"
+        },
+        {
+          "name": "variable.other.constant.register.ik8b",
+          "match": "%[A-Za-z_][A-Za-z0-9_./]*"
+        }
+      ]
+    },
+    "variables": {
+      "patterns": [
+        {
+          "name": "variable.other.readwrite.ik8b",
+          "match": "\\$[A-Za-z_][A-Za-z0-9_./]*"
+        }
+      ]
+    },
+    "namespaceId": {
+      "patterns": [
+        {
+          "name": "entity.name.namespace.ik8b",
+          "match": "(?<=\\bnamespace\\s)[A-Za-z_][A-Za-z0-9_./]*"
+        },
+        {
+          "name": "entity.name.namespace.ik8b",
+          "match": "(?<=\\bnamespace\\s*==\\s)[A-Za-z_][A-Za-z0-9_./]*"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "name": "ik8b-language-support",
+  "displayName": "ik8b Language Support",
+  "description": "Complete VS Code language support for ik8b (.ik): syntax highlighting, snippets, comments, bracket matching, and editor behavior.",
+  "version": "0.1.0",
+  "publisher": "ik8b",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ik8b/ik8b"
+  },
+  "keywords": [
+    "ik8b",
+    "avr",
+    "embedded",
+    "language",
+    "syntax-highlighting"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Themes"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onLanguage:ik8b",
+    "workspaceContains:**/*.ik"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "ik8b",
+        "aliases": [
+          "ik8b",
+          "IK8B"
+        ],
+        "extensions": [
+          ".ik"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "ik8b",
+        "scopeName": "source.ik8b",
+        "path": "./syntaxes/ik8b.tmLanguage.json"
+      }
+    ],
+    "themes": [
+      {
+        "label": "ik8b Clean",
+        "uiTheme": "vs-dark",
+        "path": "./themes/ik8b-clean-color-theme.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "ik8b",
+        "path": "./snippets/ik8b.code-snippets"
+      }
+    ],
+    "configuration": {
+      "title": "ik8b",
+      "properties": {
+        "ik8b.requireNamespace": {
+          "type": "boolean",
+          "default": true,
+          "description": "Require at least one namespace declaration somewhere in the .ik file."
+        },
+        "ik8b.enableCompilerDiagnostics": {
+          "type": "boolean",
+          "default": false,
+          "description": "Additionally run the external ik8b compiler in the background and surface its errors as diagnostics."
+        },
+        "ik8b.compilerPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to ik8b compiler executable. Leave empty to use <workspace>/ik8b, then fallback to ik8b from PATH."
+        }
+      }
+    },
+    "configurationDefaults": {
+      "[ik8b]": {
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true,
+        "editor.wordBasedSuggestions": "currentDocument",
+        "editor.autoClosingBrackets": "always",
+        "editor.autoClosingQuotes": "always",
+        "editor.formatOnType": false,
+        "editor.defaultFormatter": null
+      }
+    }
+  }
+}

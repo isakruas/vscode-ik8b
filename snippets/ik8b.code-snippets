@@ -1,0 +1,135 @@
+{
+  "Namespace": {
+    "prefix": "ns",
+    "body": [
+      "namespace ${1:atmega328p}"
+    ],
+    "description": "Declare active namespace"
+  },
+  "Import": {
+    "prefix": "imp",
+    "body": [
+      "import ${1:std/gpio}"
+    ],
+    "description": "Import a module"
+  },
+  "Const Register": {
+    "prefix": "constreg",
+    "body": [
+      "const %PORTB: u16 = ${1:0x0025}"
+    ],
+    "description": "Register address constant"
+  },
+  "Main Function": {
+    "prefix": "main",
+    "body": [
+      "@main {",
+      "    ${1}",
+      "}"
+    ],
+    "description": "Main entry"
+  },
+  "Function": {
+    "prefix": "fn",
+    "body": [
+      "@${1:name}($a: ${2:u8}, $b: ${3:u8}) -> ${4:u16} {",
+      "    ${5:return $a + $b}",
+      "}"
+    ],
+    "description": "Function with parameters"
+  },
+  "Mutable Variable": {
+    "prefix": "mut",
+    "body": [
+      "mut $name: ${1:u8} = ${2:0}"
+    ],
+    "description": "Mutable variable"
+  },
+  "Immutable Variable": {
+    "prefix": "val",
+    "body": [
+      "val $name: ${1:u8} = ${2:0}"
+    ],
+    "description": "Immutable variable"
+  },
+  "Array Variable": {
+    "prefix": "arr",
+    "body": [
+      "mut $buf: ${1:u8}[${2:8}] = ${3:0}"
+    ],
+    "description": "Array declaration"
+  },
+  "If / Else": {
+    "prefix": "if",
+    "body": [
+      "? ${1:$cond} {",
+      "    ${2}",
+      "} : {",
+      "    ${3}",
+      "}"
+    ],
+    "description": "Conditional"
+  },
+  "Namespace Condition": {
+    "prefix": "ifns",
+    "body": [
+      "? namespace == ${1:atmega328p} {",
+      "    ${2}",
+      "}"
+    ],
+    "description": "Compile-time namespace condition"
+  },
+  "Switch": {
+    "prefix": "switch",
+    "body": [
+      "switch ${1:$value} {",
+      "    ${2:0} -> {",
+      "        ${3}",
+      "    }",
+      "    * -> {",
+      "        ${4}",
+      "    }",
+      "}"
+    ],
+    "description": "Switch statement"
+  },
+  "Infinite Loop": {
+    "prefix": "loop",
+    "body": [
+      "loop * {",
+      "    ${1}",
+      "}"
+    ],
+    "description": "Infinite loop"
+  },
+  "Range Loop": {
+    "prefix": "for",
+    "body": [
+      "loop ${1:0}..${2:10} -> $i {",
+      "    ${3}",
+      "}"
+    ],
+    "description": "Range-based loop"
+  },
+  "Assignment": {
+    "prefix": "asgn",
+    "body": [
+      "${1:$src} -> ${2:$dst}"
+    ],
+    "description": "Direct assignment"
+  },
+  "Return": {
+    "prefix": "ret",
+    "body": [
+      "return ${1:0}"
+    ],
+    "description": "Return value"
+  },
+  "Intrinsic NOP": {
+    "prefix": "nop",
+    "body": [
+      "@nop()"
+    ],
+    "description": "NOP intrinsic"
+  }
+}
