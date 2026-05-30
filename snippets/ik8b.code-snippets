@@ -38,26 +38,61 @@
     ],
     "description": "Function with parameters"
   },
-  "Mutable Variable": {
-    "prefix": "mut",
+  "RAM Mutable Variable": {
+    "prefix": "rammut",
     "body": [
-      "mut $name: ${1:u8} = ${2:0}"
+      "ram mut $name: ${1:u8} = ${2:0}"
     ],
-    "description": "Mutable variable"
+    "description": "RAM mutable variable"
   },
-  "Immutable Variable": {
-    "prefix": "val",
+  "RAM Immutable Variable": {
+    "prefix": "ramimut",
     "body": [
-      "val $name: ${1:u8} = ${2:0}"
+      "ram imut $name: ${1:u8} = ${2:0}"
     ],
-    "description": "Immutable variable"
+    "description": "RAM immutable variable"
   },
-  "Array Variable": {
-    "prefix": "arr",
+  "EEPROM Mutable Variable": {
+    "prefix": "eeprommut",
     "body": [
-      "mut $buf: ${1:u8}[${2:8}] = ${3:0}"
+      "eeprom mut $name: ${1:u8} = ${2:0}"
     ],
-    "description": "Array declaration"
+    "description": "EEPROM mutable variable"
+  },
+  "EEPROM Immutable Variable": {
+    "prefix": "eepromimut",
+    "body": [
+      "eeprom imut $name: ${1:u8} = ${2:0}"
+    ],
+    "description": "EEPROM immutable variable"
+  },
+  "Flash Immutable Variable": {
+    "prefix": "flashimut",
+    "body": [
+      "flash imut $name: ${1:u8} = ${2:0}"
+    ],
+    "description": "Flash immutable variable"
+  },
+  "RAM Array Variable": {
+    "prefix": "ramarr",
+    "body": [
+      "ram mut $buf: ${1:u8}[${2:8}] = ${3:0}"
+    ],
+    "description": "RAM array declaration"
+  },
+  "EEPROM Array Variable": {
+    "prefix": "eepromarr",
+    "body": [
+      "eeprom mut $buf: ${1:u8}[${2:8}] = ${3:0}"
+    ],
+    "description": "EEPROM array declaration"
+  },
+  "Flash Array Variable": {
+    "prefix": "flasharr",
+    "body": [
+      "flash imut $buf: ${1:u8}[${2:8}] = ${3:0}"
+    ],
+    "description": "Flash array declaration"
   },
   "If / Else": {
     "prefix": "if",

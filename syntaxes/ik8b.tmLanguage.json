@@ -66,7 +66,7 @@
       "patterns": [
         {
           "name": "keyword.control.ik8b",
-          "match": "\\b(?:import|namespace|const|mut|val|return|loop|switch)\\b"
+          "match": "\\b(?:import|namespace|const|mut|imut|ram|eeprom|flash|return|loop|switch)\\b"
         },
         {
           "name": "keyword.control.flow.ik8b",
