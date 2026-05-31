@@ -15,17 +15,23 @@
       "open": "'",
       "close": "'",
       "notIn": ["string", "comment"]
+    },
+    {
+      "open": "\"",
+      "close": "\"",
+      "notIn": ["string", "comment"]
     }
   ],
   "surroundingPairs": [
     ["{", "}"],
     ["[", "]"],
     ["(", ")"],
-    ["'", "'"]
+    ["'", "'"],
+    ["\"", "\""]
   ],
   "folding": {
     "markers": {
-      "start": "^\\s*(\\?|switch|loop|@[A-Za-z_][A-Za-z0-9_./]*\\s*\\(.*\\)\\s*(->\\s*(u8|u16|void))?\\s*\\{)",
+      "start": "^\\s*(\\?|switch|loop|@[A-Za-z_][A-Za-z0-9_./]*\\s*\\(.*\\)\\s*(->[^\\{]*)?\\{)",
       "end": "^\\s*\\}"
     }
   },

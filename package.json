@@ -2,7 +2,7 @@
   "name": "ik8b-language-support",
   "displayName": "ik8b Language Support",
   "description": "Complete VS Code language support for ik8b (.ik): syntax highlighting, snippets, comments, bracket matching, and editor behavior.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "ik8b",
   "license": "Apache-2.0",
   "repository": {

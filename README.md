@@ -5,9 +5,11 @@ Visual Studio Code support for the **ik8b** language (`.ik`) used for AVR-8 embe
 ## Features
 
 - Syntax highlighting for:
-  - Keywords, control flow, and types
+  - Keywords, control flow, and all scalar types (`u8`, `u16`, `i8`, `i16`, `bool`, `char`, `r8`, `r16`, `void`)
+  - Pointer (`ptr`), string (`str`), and function-pointer (`fn`) type constructors
   - Sigil identifiers (`%register`, `$variable`, `@function`)
-  - Numbers (decimal and hex), booleans, and character literals
+  - Function pointers: address-of `&@func` and indirect calls `@$var(...)`
+  - Numbers (decimal, hex, fixed-point), booleans, character literals, and string literals (with `\xHH` escapes)
   - Operators, assignments, and punctuation
 - Language-aware editor behavior:
   - Line comments with `#`

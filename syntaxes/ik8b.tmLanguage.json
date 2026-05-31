@@ -12,6 +12,7 @@
     { "include": "#booleans" },
     { "include": "#operators" },
     { "include": "#intrinsics" },
+    { "include": "#functionPointers" },
     { "include": "#functionCalls" },
     { "include": "#functionDecl" },
     { "include": "#registers" },
@@ -29,6 +30,17 @@
     },
     "strings": {
       "patterns": [
+        {
+          "name": "string.quoted.double.ik8b",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.ik8b",
+              "match": "\\\\(?:n|r|t|0|\\\\|\"|x[0-9A-Fa-f]{2})"
+            }
+          ]
+        },
         {
           "name": "string.quoted.single.ik8b",
           "begin": "'",
@@ -66,7 +78,7 @@
       "patterns": [
         {
           "name": "keyword.control.ik8b",
-          "match": "\\b(?:import|namespace|const|mut|imut|ram|eeprom|flash|return|loop|switch)\\b"
+          "match": "\\b(?:import|namespace|const|mut|imut|ram|eeprom|flash|return|loop|switch|ptr|str|fn)\\b"
         },
         {
           "name": "keyword.control.flow.ik8b",
@@ -82,7 +94,7 @@
       "patterns": [
         {
           "name": "storage.type.ik8b",
-          "match": "\\b(?:u8|u16|void)\\b"
+          "match": "\\b(?:u8|u16|i8|i16|bool|char|r8|r16|void)\\b"
         }
       ]
     },
@@ -151,6 +163,26 @@
         {
           "name": "support.function.builtin.ik8b",
           "match": "@(?:nop|sleep|wdr|break|reti|lpm|elpm|spm|ijmp|icall|eijmp|eicall|des|swap|movw|mul|muls|mulsu|fmul|fmuls|fmulsu)(?=\\s*\\()"
+        }
+      ]
+    },
+    "functionPointers": {
+      "patterns": [
+        {
+          "comment": "Indirect call through a function-pointer variable: @$var(...)",
+          "match": "(@)(\\$[A-Za-z_][A-Za-z0-9_./]*)(?=\\s*\\()",
+          "captures": {
+            "1": { "name": "keyword.operator.indirect-call.ik8b" },
+            "2": { "name": "variable.other.readwrite.ik8b" }
+          }
+        },
+        {
+          "comment": "Address of a function: &@func",
+          "match": "(&)(@[A-Za-z_][A-Za-z0-9_./]*)",
+          "captures": {
+            "1": { "name": "keyword.operator.address-of.ik8b" },
+            "2": { "name": "entity.name.function.ik8b" }
+          }
         }
       ]
     },

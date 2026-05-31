@@ -17,7 +17,9 @@ function isIdentStart(ch) {
 }
 
 function isIdentPart(ch) {
-  return /[A-Za-z0-9_./]/.test(ch);
+  // Sigils $ and @ may appear mid-identifier so that `@$var` (an indirect call
+  // target) lexes as a single token, matching the compiler lexer.
+  return /[A-Za-z0-9_./$@]/.test(ch);
 }
 
 function tokenize(text) {
@@ -26,8 +28,8 @@ function tokenize(text) {
   let line = 0;
   let col = 0;
 
-  const keywords = new Set(['import', 'namespace', 'const', 'mut', 'imut', 'ram', 'eeprom', 'flash', 'return', 'loop', 'switch', 'true', 'false']);
-  const types = new Set(['u8', 'u16', 'void']);
+  const keywords = new Set(['import', 'namespace', 'const', 'mut', 'imut', 'ram', 'eeprom', 'flash', 'return', 'loop', 'switch', 'ptr', 'str', 'fn', 'true', 'false']);
+  const types = new Set(['u8', 'u16', 'i8', 'i16', 'bool', 'char', 'r8', 'r16', 'void']);
 
   function push(kind, value, tokLine = line, tokCol = col) {
     tokens.push({ kind, value, line: tokLine, col: tokCol });
@@ -49,7 +51,7 @@ function tokenize(text) {
   }
 
   const multi = ['->+', '->-', '->&', '->|', '->^', '->', '..', '==', '!=', '<=', '>=', '&&', '||'];
-  const single = new Set(['{', '}', '(', ')', '[', ']', ',', ':', '?', '*', '+', '-', '/', '%', '&', '|', '^', '~', '!', '<', '>', '=']);
+  const single = new Set(['{', '}', '(', ')', '[', ']', ',', ':', '?', '*', '+', '-', '/', '&', '|', '^', '~', '!', '<', '>', '=']);
 
   while (i < text.length) {
     const ch = peek();
@@ -86,6 +88,53 @@ function tokenize(text) {
       }
       advance();
       push('char', 'char', l, c);
+      continue;
+    }
+
+    if (ch === '"') {
+      const l = line;
+      const c = col;
+      advance();
+      while (true) {
+        if (i >= text.length) throw new IkError('Unterminated string literal', l, c);
+        const sc = peek();
+        if (sc === '"') { advance(); break; }
+        if (sc === '\\') {
+          advance();
+          const esc = peek();
+          if (esc === 'x') {
+            advance();
+            const h1 = peek(); const h2 = peek(1);
+            if (!/[0-9A-Fa-f]/.test(h1) || !/[0-9A-Fa-f]/.test(h2)) {
+              throw new IkError('Invalid hex escape, expected \\xHH', line, col);
+            }
+            advance(); advance();
+          } else if ('nrt0\\"'.includes(esc)) {
+            advance();
+          } else {
+            throw new IkError(`Invalid string escape \\${esc}`, line, col);
+          }
+        } else {
+          advance();
+        }
+      }
+      push('str', 'str', l, c);
+      continue;
+    }
+
+    // '%' is the register sigil when followed by an identifier (%PORTB), and
+    // the modulo operator otherwise (a % b).
+    if (ch === '%') {
+      const l = line;
+      const c = col;
+      if (isIdentStart(peek(1))) {
+        let s = advance();
+        while (isIdentPart(peek())) s += advance();
+        push('id', s, l, c);
+      } else {
+        push('sym', '%');
+        advance();
+      }
       continue;
     }
 
@@ -136,6 +185,11 @@ function tokenize(text) {
         while (/[0-9A-Fa-f]/.test(peek())) s += advance();
       } else {
         while (/[0-9]/.test(peek())) s += advance();
+        // Fractional part: '.' followed by a digit is a fixed-point literal.
+        if (peek() === '.' && /[0-9]/.test(peek(1))) {
+          s += advance();
+          while (/[0-9]/.test(peek())) s += advance();
+        }
       }
       push('num', s, l, c);
       continue;
@@ -171,6 +225,55 @@ class Parser {
     return this.take();
   }
 
+  maybeArraySuffix() {
+    if (this.at('sym', '[')) {
+      this.take();
+      this.expect('num', undefined, 'Expected array size number');
+      this.expect('sym', ']', 'Expected ]');
+    }
+  }
+
+  // Parses a type annotation: primitive, ptr <space> <pointee>, str <space>,
+  // or fn(<types>) [-> <type>], with an optional trailing array suffix.
+  parseType() {
+    if (this.at('kw', 'ptr')) {
+      this.take();
+      if (!(this.at('kw', 'ram') || this.at('kw', 'eeprom') || this.at('kw', 'flash'))) {
+        const tk = this.p();
+        throw new IkError('Expected pointer space (ram/eeprom/flash) after ptr', tk ? tk.line : 0, tk ? tk.col : 0);
+      }
+      this.take();
+      this.parseType();
+      this.maybeArraySuffix();
+      return;
+    }
+    if (this.at('kw', 'str')) {
+      this.take();
+      if (!(this.at('kw', 'ram') || this.at('kw', 'flash'))) {
+        const tk = this.p();
+        throw new IkError('Expected string space (ram/flash) after str', tk ? tk.line : 0, tk ? tk.col : 0);
+      }
+      this.take();
+      return;
+    }
+    if (this.at('kw', 'fn')) {
+      this.take();
+      this.expect('sym', '(', 'Expected ( in function type');
+      if (!this.at('sym', ')')) {
+        while (true) {
+          this.parseType();
+          if (this.at('sym', ',')) { this.take(); continue; }
+          break;
+        }
+      }
+      this.expect('sym', ')', 'Expected ) in function type');
+      if (this.at('sym', '->')) { this.take(); this.parseType(); }
+      return;
+    }
+    this.expect('type', undefined, 'Expected type');
+    this.maybeArraySuffix();
+  }
+
   parseProgram() {
     while (!this.at('eof')) this.parseTopLevel();
   }
@@ -200,7 +303,7 @@ class Parser {
     const id = this.expect('id', undefined, 'Expected register constant name');
     if (!id.value.startsWith('%')) throw new IkError('Constant name must start with %', id.line, id.col);
     this.expect('sym', ':', 'Expected :');
-    this.expect('type', undefined, 'Expected type');
+    this.parseType();
     this.expect('sym', '=', 'Expected =');
     this.expect('num', undefined, 'Expected number literal');
   }
@@ -230,7 +333,7 @@ class Parser {
           const p = this.expect('id', undefined, 'Expected parameter name');
           if (!p.value.startsWith('$')) throw new IkError('Parameter must start with $', p.line, p.col);
           this.expect('sym', ':', 'Expected : in parameter');
-          this.expect('type', undefined, 'Expected parameter type');
+          this.parseType();
           if (this.at('sym', ',')) {
             this.take();
             continue;
@@ -243,7 +346,7 @@ class Parser {
 
     if (this.at('sym', '->')) {
       this.take();
-      this.expect('type', undefined, 'Expected return type');
+      this.parseType();
     }
 
     this.parseBlock();
@@ -277,6 +380,34 @@ class Parser {
 
   parseVarDecl() {
     const storage = this.take(); // ram, eeprom, flash
+
+    // Pointer declaration: `<storage> ptr <pointee> $name = <expr>`.
+    // (The pointed-to space is the storage keyword; the pointer is mutable.)
+    if (this.at('kw', 'ptr')) {
+      this.take();
+      this.parseType(); // pointee type
+      const v = this.expect('id', undefined, 'Expected pointer variable name');
+      if (!v.value.startsWith('$')) throw new IkError('Pointer variable must start with $', v.line, v.col);
+      this.expect('sym', '=', 'Expected =');
+      this.parseExpr();
+      return;
+    }
+
+    // String declaration: `<ram|flash> str $name = <expr>`.
+    if (this.at('kw', 'str')) {
+      this.take();
+      if (storage.value !== 'ram' && storage.value !== 'flash') {
+        throw new IkError(`String variables support only ram or flash storage (got '${storage.value}')`, storage.line, storage.col);
+      }
+      const v = this.expect('id', undefined, 'Expected string variable name');
+      if (!v.value.startsWith('$')) throw new IkError('String variable must start with $', v.line, v.col);
+      this.expect('sym', '=', 'Expected =');
+      this.parseExpr();
+      return;
+    }
+
+    // Scalar / array / function-pointer declaration:
+    //   `<storage> <mut|imut> $name : <type> [ [N] ] = <expr>`.
     const mutability = this.expect('kw', undefined, 'Expected mutability specifier (mut or imut)');
     if (mutability.value !== 'mut' && mutability.value !== 'imut') {
       throw new IkError(`Expected mutability specifier (mut or imut) after ${storage.value}`, mutability.line, mutability.col);
@@ -287,12 +418,7 @@ class Parser {
     const v = this.expect('id', undefined, 'Expected variable name');
     if (!v.value.startsWith('$')) throw new IkError('Variable must start with $', v.line, v.col);
     this.expect('sym', ':', 'Expected :');
-    this.expect('type', undefined, 'Expected type');
-    if (this.at('sym', '[')) {
-      this.take();
-      this.expect('num', undefined, 'Expected array size number');
-      this.expect('sym', ']', 'Expected ]');
-    }
+    this.parseType();
     this.expect('sym', '=', 'Expected =');
     this.parseExpr();
   }
@@ -342,7 +468,15 @@ class Parser {
 
   parseIf() {
     this.expect('sym', '?');
-    this.parseExpr();
+    // Compile-time namespace check is also allowed inside blocks:
+    //   ? namespace == <id> { ... } [ : { ... } ]
+    if (this.at('kw', 'namespace')) {
+      this.take();
+      this.expect('sym', '==', 'Expected == after namespace');
+      this.expect('id', undefined, 'Expected namespace identifier');
+    } else {
+      this.parseExpr();
+    }
     this.parseBlock();
     if (this.at('sym', ':')) {
       this.take();
@@ -351,57 +485,70 @@ class Parser {
   }
 
   parseExpr() { this.parseLogicalOr(); }
+  // An infix operator is only consumed when it sits on the same line as the
+  // previous token. This keeps a unary-prefix statement (e.g. `*$p -> $y`) from
+  // being glued onto the previous line as an infix `*`/`-`/`&`.
+  canTakeInfixHere() {
+    if (this.i === 0) return true;
+    const prevLine = this.t[this.i - 1].line;
+    const tok = this.p();
+    return tok ? tok.line === prevLine : false;
+  }
   canStartExpr() {
     return (
       this.at('num') ||
       this.at('char') ||
+      this.at('str') ||
       this.at('kw', 'true') ||
       this.at('kw', 'false') ||
       this.at('id') ||
       this.at('sym', '(') ||
       this.at('sym', '!') ||
       this.at('sym', '~') ||
-      this.at('sym', '-')
+      this.at('sym', '-') ||
+      this.at('sym', '&') ||
+      this.at('sym', '*')
     );
   }
   parseLogicalOr() {
     this.parseLogicalAnd();
-    while (this.at('sym', '||')) { this.take(); this.parseLogicalAnd(); }
+    while (this.canTakeInfixHere() && this.at('sym', '||')) { this.take(); this.parseLogicalAnd(); }
   }
   parseLogicalAnd() {
     this.parseBitOr();
-    while (this.at('sym', '&&')) { this.take(); this.parseBitOr(); }
+    while (this.canTakeInfixHere() && this.at('sym', '&&')) { this.take(); this.parseBitOr(); }
   }
   parseBitOr() {
     this.parseBitXor();
-    while (this.at('sym', '|')) { this.take(); this.parseBitXor(); }
+    while (this.canTakeInfixHere() && this.at('sym', '|')) { this.take(); this.parseBitXor(); }
   }
   parseBitXor() {
     this.parseBitAnd();
-    while (this.at('sym', '^')) { this.take(); this.parseBitAnd(); }
+    while (this.canTakeInfixHere() && this.at('sym', '^')) { this.take(); this.parseBitAnd(); }
   }
   parseBitAnd() {
     this.parseEquality();
-    while (this.at('sym', '&')) { this.take(); this.parseEquality(); }
+    while (this.canTakeInfixHere() && this.at('sym', '&')) { this.take(); this.parseEquality(); }
   }
   parseEquality() {
     this.parseRel();
-    while (this.at('sym', '==') || this.at('sym', '!=')) { this.take(); this.parseRel(); }
+    while (this.canTakeInfixHere() && (this.at('sym', '==') || this.at('sym', '!='))) { this.take(); this.parseRel(); }
   }
   parseRel() {
     this.parseAdd();
-    while (this.at('sym', '<') || this.at('sym', '>') || this.at('sym', '<=') || this.at('sym', '>=')) { this.take(); this.parseAdd(); }
+    while (this.canTakeInfixHere() && (this.at('sym', '<') || this.at('sym', '>') || this.at('sym', '<=') || this.at('sym', '>='))) { this.take(); this.parseAdd(); }
   }
   parseAdd() {
     this.parseMul();
-    while (this.at('sym', '+') || this.at('sym', '-')) { this.take(); this.parseMul(); }
+    while (this.canTakeInfixHere() && (this.at('sym', '+') || this.at('sym', '-'))) { this.take(); this.parseMul(); }
   }
   parseMul() {
     this.parseUnary();
-    while (this.at('sym', '*') || this.at('sym', '/') || this.at('sym', '%')) { this.take(); this.parseUnary(); }
+    while (this.canTakeInfixHere() && (this.at('sym', '*') || this.at('sym', '/') || this.at('sym', '%'))) { this.take(); this.parseUnary(); }
   }
   parseUnary() {
-    if (this.at('sym', '!') || this.at('sym', '~') || this.at('sym', '-')) {
+    // `&` is address-of and `*` is dereference in operand position.
+    if (this.at('sym', '!') || this.at('sym', '~') || this.at('sym', '-') || this.at('sym', '&') || this.at('sym', '*')) {
       this.take();
       this.parseUnary();
       return;
@@ -410,7 +557,7 @@ class Parser {
   }
 
   parsePrimary() {
-    if (this.at('num') || this.at('char')) {
+    if (this.at('num') || this.at('char') || this.at('str')) {
       this.take();
       return;
     }
@@ -420,7 +567,7 @@ class Parser {
     }
     if (this.at('id')) {
       const id = this.take();
-      if (id.value.startsWith('@') && this.at('sym', '(')) {
+      if (id.value.startsWith('@') && this.canTakeInfixHere() && this.at('sym', '(')) {
         this.take();
         if (!this.at('sym', ')')) {
           while (true) {
@@ -435,7 +582,7 @@ class Parser {
         this.expect('sym', ')', 'Expected ) after call');
         return;
       }
-      if (this.at('sym', '[')) {
+      if (this.canTakeInfixHere() && this.at('sym', '[')) {
         this.take();
         this.parseExpr();
         this.expect('sym', ']', 'Expected ] after index');
@@ -535,7 +682,10 @@ const keywordsDoc = {
   'import': '**import** keyword\n\nImports a standard library or external module (e.g., `import std/gpio`).',
   'namespace': '**namespace** keyword\n\nSets the active compilation target namespace or evaluates target-specific conditional blocks.',
   'loop': '**loop** keyword\n\nDeclares loops, including infinite loops (`loop *`) and range loops (`loop 0..10 -> $i`).',
-  'switch': '**switch** keyword\n\nDeclares multi-way branch selection switches.'
+  'switch': '**switch** keyword\n\nDeclares multi-way branch selection switches.',
+  'ptr': '**ptr** type constructor\n\nA pointer to a value in a memory space: `ptr <ram|eeprom|flash> <type>` (e.g. `ptr ram u8`). Take an address with `&$x` and read/write with `*($p + i)`.',
+  'str': '**str** type constructor\n\nA string by base address: `str ram` (mutable, in SRAM) or `str flash` (read-only, in program memory). Initialized from a `"..."` literal; index bytes with `$name[i]`.',
+  'fn': '**fn** function-pointer type\n\n`fn(<args>)` or `fn(<args>) -> <ret>` (e.g. `fn(u8)`, `fn(u8,u8) -> u8`). Produce one with `&@func`; call it indirectly with `@$var(args)`.'
 };
 
 class IkHoverProvider {

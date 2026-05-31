@@ -166,5 +166,54 @@
       "@nop()"
     ],
     "description": "NOP intrinsic"
+  },
+  "Pointer Variable": {
+    "prefix": "ptr",
+    "body": [
+      "${1|ram,eeprom,flash|} ptr ${2:u8} $${3:p} = ${4:&$x}"
+    ],
+    "description": "Pointer declaration"
+  },
+  "RAM String": {
+    "prefix": "strram",
+    "body": [
+      "ram str $${1:s} = \"${2:hello}\""
+    ],
+    "description": "Mutable string in SRAM"
+  },
+  "Flash String": {
+    "prefix": "strflash",
+    "body": [
+      "flash str $${1:s} = \"${2:hello}\\x00\""
+    ],
+    "description": "Read-only string in program flash"
+  },
+  "Function Pointer Variable": {
+    "prefix": "fnptr",
+    "body": [
+      "ram mut $${1:cb}: fn(${2:u8})${3: -> u8} = &@${4:func}"
+    ],
+    "description": "Function-pointer local initialized with &@func"
+  },
+  "Function Pointer Parameter": {
+    "prefix": "fnparam",
+    "body": [
+      "$${1:cb}: fn(${2:u8})${3: -> u8}"
+    ],
+    "description": "Function-pointer parameter type"
+  },
+  "Indirect Call": {
+    "prefix": "callptr",
+    "body": [
+      "@$${1:cb}(${2})"
+    ],
+    "description": "Indirect call through a function pointer"
+  },
+  "Function Address": {
+    "prefix": "addr",
+    "body": [
+      "&@${1:func}"
+    ],
+    "description": "Address of a function (function pointer value)"
   }
 }
