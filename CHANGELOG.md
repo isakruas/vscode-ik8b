@@ -11,7 +11,7 @@
 - Rewrote the background validator to accept the full current grammar:
   pointer/string/function-pointer declarations, `str flash`, fractional
   (fixed-point) literals, `%REG` register references, address-of/dereference
-  operators, and compile-time `? namespace == ...` checks inside blocks.
+  operators, and compile-time `? target == ...` checks inside blocks.
   Infix operators now respect statement boundaries (a `*`/`-`/`&` starting a
   line is no longer glued onto the previous statement).
 - Added snippets: pointer/string/flash-string declarations, function-pointer

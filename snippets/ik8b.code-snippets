@@ -1,10 +1,10 @@
 {
-  "Namespace": {
+  "target": {
     "prefix": "ns",
     "body": [
-      "namespace ${1:atmega328p}"
+      "target ${1:atmega328p}"
     ],
-    "description": "Declare active namespace"
+    "description": "Declare active target"
   },
   "Import": {
     "prefix": "imp",
@@ -105,14 +105,14 @@
     ],
     "description": "Conditional"
   },
-  "Namespace Condition": {
+  "target Condition": {
     "prefix": "ifns",
     "body": [
-      "? namespace == ${1:atmega328p} {",
+      "? target == ${1:atmega328p} {",
       "    ${2}",
       "}"
     ],
-    "description": "Compile-time namespace condition"
+    "description": "Compile-time target condition"
   },
   "Switch": {
     "prefix": "switch",

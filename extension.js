@@ -28,7 +28,7 @@ function tokenize(text) {
   let line = 0;
   let col = 0;
 
-  const keywords = new Set(['import', 'namespace', 'const', 'mut', 'imut', 'ram', 'eeprom', 'flash', 'return', 'loop', 'switch', 'ptr', 'str', 'fn', 'true', 'false']);
+  const keywords = new Set(['import', 'target', 'const', 'mut', 'imut', 'ram', 'eeprom', 'flash', 'return', 'loop', 'switch', 'ptr', 'str', 'fn', 'true', 'false']);
   const types = new Set(['u8', 'u16', 'i8', 'i16', 'bool', 'char', 'r8', 'r16', 'void']);
 
   function push(kind, value, tokLine = line, tokCol = col) {
@@ -280,12 +280,12 @@ class Parser {
 
   parseTopLevel() {
     if (this.at('kw', 'import')) return this.parseImport();
-    if (this.at('kw', 'namespace')) return this.parseNamespace();
+    if (this.at('kw', 'target')) return this.parsetarget();
     if (this.at('kw', 'const')) return this.parseConst();
     if (this.at('sym', '?')) return this.parseCompileTimeConditional();
     if (this.at('id') && this.p().value.startsWith('@')) return this.parseFunction();
     const tok = this.p();
-    throw new IkError('Expected top-level declaration (import, namespace, const or function)', tok.line, tok.col);
+    throw new IkError('Expected top-level declaration (import, target, const or function)', tok.line, tok.col);
   }
 
   parseImport() {
@@ -293,9 +293,9 @@ class Parser {
     this.expect('id', undefined, 'Expected import path');
   }
 
-  parseNamespace() {
-    this.expect('kw', 'namespace');
-    this.expect('id', undefined, 'Expected namespace identifier');
+  parsetarget() {
+    this.expect('kw', 'target');
+    this.expect('id', undefined, 'Expected target identifier');
   }
 
   parseConst() {
@@ -310,9 +310,9 @@ class Parser {
 
   parseCompileTimeConditional() {
     this.expect('sym', '?');
-    this.expect('kw', 'namespace', "Expected 'namespace' in compile-time condition");
+    this.expect('kw', 'target', "Expected 'target' in compile-time condition");
     this.expect('sym', '==', 'Expected ==');
-    this.expect('id', undefined, 'Expected namespace identifier');
+    this.expect('id', undefined, 'Expected target identifier');
     this.parseTopLevelBlock();
   }
 
@@ -468,12 +468,12 @@ class Parser {
 
   parseIf() {
     this.expect('sym', '?');
-    // Compile-time namespace check is also allowed inside blocks:
-    //   ? namespace == <id> { ... } [ : { ... } ]
-    if (this.at('kw', 'namespace')) {
+    // Compile-time target check is also allowed inside blocks:
+    //   ? target == <id> { ... } [ : { ... } ]
+    if (this.at('kw', 'target')) {
       this.take();
-      this.expect('sym', '==', 'Expected == after namespace');
-      this.expect('id', undefined, 'Expected namespace identifier');
+      this.expect('sym', '==', 'Expected == after target');
+      this.expect('id', undefined, 'Expected target identifier');
     } else {
       this.parseExpr();
     }
@@ -680,7 +680,7 @@ const keywordsDoc = {
   'imut': '**imut** mutability specifier\n\nDeclares an immutable variable (constant) whose value is computed at compile-time and cannot be changed.',
   'const': '**const** keyword\n\nDeclares a compile-time alias for registers (e.g. `const %PORTB: u16 = 0x0025`).',
   'import': '**import** keyword\n\nImports a standard library or external module (e.g., `import std/gpio`).',
-  'namespace': '**namespace** keyword\n\nSets the active compilation target namespace or evaluates target-specific conditional blocks.',
+  'target': '**target** keyword\n\nSets the active compilation target target or evaluates target-specific conditional blocks.',
   'loop': '**loop** keyword\n\nDeclares loops, including infinite loops (`loop *`) and range loops (`loop 0..10 -> $i`).',
   'switch': '**switch** keyword\n\nDeclares multi-way branch selection switches.',
   'ptr': '**ptr** type constructor\n\nA pointer to a value in a memory space: `ptr <ram|eeprom|flash> <type>` (e.g. `ptr ram u8`). Take an address with `&$x` and read/write with `*($p + i)`.',
@@ -721,14 +721,14 @@ class IkDocumentSymbolProvider {
       const tokens = tokenize(text);
       for (let i = 0; i < tokens.length; i++) {
         const tok = tokens[i];
-        if (tok.kind === 'kw' && tok.value === 'namespace') {
+        if (tok.kind === 'kw' && tok.value === 'target') {
           const next = tokens[i + 1];
           if (next && next.kind === 'id') {
             const range = new vscode.Range(tok.line, tok.col, next.line, next.col + next.value.length);
             symbols.push(new vscode.DocumentSymbol(
               next.value,
-              'namespace',
-              vscode.SymbolKind.Namespace,
+              'target',
+              vscode.SymbolKind.target,
               range,
               range
             ));
@@ -862,10 +862,10 @@ function activate(context) {
       const text = doc.getText();
       const tokens = tokenize(text);
 
-      if (cfg.get('requireNamespace', true)) {
-        const hasNamespace = tokens.some((t) => t.kind === 'kw' && t.value === 'namespace');
-        if (!hasNamespace) {
-          diagnostics.push(createDiagnostic(doc, 0, 0, 'Missing required namespace declaration. Add: namespace <target>, for example: namespace atmega328p'));
+      if (cfg.get('requiretarget', true)) {
+        const hastarget = tokens.some((t) => t.kind === 'kw' && t.value === 'target');
+        if (!hastarget) {
+          diagnostics.push(createDiagnostic(doc, 0, 0, 'Missing required target declaration. Add: target <target>, for example: target atmega328p'));
         }
       }
 

@@ -16,10 +16,10 @@ Visual Studio Code support for the **ik8b** language (`.ik`) used for AVR-8 embe
   - Auto-closing pairs for `{}`, `[]`, `()`, and `'...'`
   - Bracket matching and surrounding pairs
   - Folding support for blocks
-- Namespace validation:
-  - By default, the extension requires at least one namespace declaration in the file.
-  - Example: `namespace atmega328p`
-  - Can be disabled via `ik8b.requireNamespace`.
+- target validation:
+  - By default, the extension requires at least one target declaration in the file.
+  - Example: `target atmega328p`
+  - Can be disabled via `ik8b.requiretarget`.
 - Built-in parser diagnostics:
   - The extension includes an internal lexer/parser for real-time syntax validation.
   - Errors are reported with line and column directly in the editor.
@@ -27,8 +27,8 @@ Visual Studio Code support for the **ik8b** language (`.ik`) used for AVR-8 embe
   - You can also enable external compiler diagnostics via `ik8b.enableCompilerDiagnostics`.
   - Compiler path is configurable with `ik8b.compilerPath`.
 - Productivity snippets:
-  - Namespace declarations
-  - Compile-time namespace conditions
+  - target declarations
+  - Compile-time target conditions
   - Function templates
   - Loops, conditionals, switch, assignments
   - Register constants and variable declarations

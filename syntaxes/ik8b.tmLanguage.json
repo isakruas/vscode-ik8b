@@ -17,7 +17,7 @@
     { "include": "#functionDecl" },
     { "include": "#registers" },
     { "include": "#variables" },
-    { "include": "#namespaceId" }
+    { "include": "#targetId" }
   ],
   "repository": {
     "comments": {
@@ -78,7 +78,7 @@
       "patterns": [
         {
           "name": "keyword.control.ik8b",
-          "match": "\\b(?:import|namespace|const|mut|imut|ram|eeprom|flash|return|loop|switch|ptr|str|fn)\\b"
+          "match": "\\b(?:import|target|const|mut|imut|ram|eeprom|flash|return|loop|switch|ptr|str|fn)\\b"
         },
         {
           "name": "keyword.control.flow.ik8b",
@@ -226,15 +226,15 @@
         }
       ]
     },
-    "namespaceId": {
+    "targetId": {
       "patterns": [
         {
-          "name": "entity.name.namespace.ik8b",
-          "match": "(?<=\\bnamespace\\s)[A-Za-z_][A-Za-z0-9_./]*"
+          "name": "entity.name.target.ik8b",
+          "match": "(?<=\\btarget\\s)[A-Za-z_][A-Za-z0-9_./]*"
         },
         {
-          "name": "entity.name.namespace.ik8b",
-          "match": "(?<=\\bnamespace\\s*==\\s)[A-Za-z_][A-Za-z0-9_./]*"
+          "name": "entity.name.target.ik8b",
+          "match": "(?<=\\btarget\\s*==\\s)[A-Za-z_][A-Za-z0-9_./]*"
         }
       ]
     }

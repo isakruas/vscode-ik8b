@@ -58,10 +58,10 @@
     "configuration": {
       "title": "ik8b",
       "properties": {
-        "ik8b.requireNamespace": {
+        "ik8b.requiretarget": {
           "type": "boolean",
           "default": true,
-          "description": "Require at least one namespace declaration somewhere in the .ik file."
+          "description": "Require at least one target declaration somewhere in the .ik file."
         },
         "ik8b.enableCompilerDiagnostics": {
           "type": "boolean",
